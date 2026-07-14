@@ -95,7 +95,8 @@ app.use((req, res, next) => {
 
 // ── STATIC FILES + CLEAN URLS ──
 // /terms → terms.html, /privacy → privacy.html, etc.
-app.use(express.static(__dirname, {
+const staticRoot = path.join(__dirname, 'public');
+app.use(express.static(staticRoot, {
   index: 'index.html',
   extensions: ['html'],
 }));
