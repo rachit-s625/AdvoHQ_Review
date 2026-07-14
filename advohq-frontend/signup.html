@@ -383,7 +383,8 @@
 
   function validate() {
     const phoneOk = phone.value.length >= 7;
-    const emailOk = emailRe.test(email.value.trim());
+    const emailVal = email.value.trim();
+    const emailOk = emailVal.length <= 254 && emailRe.test(emailVal);
     const otpOk = otpSent && otp.value.trim().length === 6;
     nextBtn.disabled = !(phoneOk && emailOk && otpOk);
     return { phoneOk, emailOk, otpOk };
@@ -423,7 +424,8 @@
   }
 
   async function requestOtp() {
-    if (!emailRe.test(email.value.trim())) {
+    const emailVal = email.value.trim();
+    if (emailVal.length > 254 || !emailRe.test(emailVal)) {
       helper.classList.add('error');
       helper.textContent = 'Enter a valid email address before requesting a code.';
       return;

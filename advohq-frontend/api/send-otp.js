@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
   const email = String(body.email || '').trim().toLowerCase();
-  if (!emailRe.test(email)) {
+  if (email.length > 254 || !emailRe.test(email)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
 
