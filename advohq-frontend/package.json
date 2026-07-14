@@ -1,0 +1,19 @@
+{
+  "name": "advohq-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AdvoHQ static site + Express server (static hosting + chat/OTP API routes)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.109.0",
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

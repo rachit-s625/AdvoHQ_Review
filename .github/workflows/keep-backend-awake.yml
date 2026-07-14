@@ -1,0 +1,32 @@
+# Render's free tier spins services down after ~15 idle minutes, which makes
+# the first visit hang for 1-2 minutes (frontend wake + backend wake). This
+# pings both services every 10 minutes during Indian working hours so the app
+# is always fast when advocates actually use it.
+#
+# Free-hours math: Render allows 750 instance-hours/month across the
+# workspace. Two services kept awake 10h/day ≈ 620 h/month, leaving ~130 h
+# for organic off-hours traffic. Do NOT widen the window much beyond this —
+# two services awake 24/7 would need ~1,460 h and Render would suspend the
+# services mid-month.
+#
+# Window: 04:00-13:59 UTC = 09:30-19:29 IST.
+name: Keep Render services awake
+
+on:
+  schedule:
+    - cron: "*/10 4-13 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping frontend (advohq.in)
+        run: |
+          curl -sS -o /dev/null -w "frontend responded HTTP %{http_code} in %{time_total}s\n" \
+            --max-time 180 --retry 2 https://advohq.in/
+      - name: Ping backend health endpoint
+        run: |
+          curl -sS -o /dev/null -w "backend responded HTTP %{http_code} in %{time_total}s\n" \
+            --max-time 180 --retry 2 \
+            https://advohq-backend.onrender.com/actuator/health
