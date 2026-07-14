@@ -102,29 +102,41 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'No message provided.' });
   }
 
-  let system =
+  const system =
     'You are Advo AI, a legal assistant inside AdvoHQ — a case and brief ' +
     'management app for advocates. Help users summarise documents, find key ' +
     'clauses, list action items, draft responses, and answer legal questions ' +
     'clearly and concisely. Keep answers practical and well structured. You are ' +
     'not a substitute for professional legal advice — remind users to verify ' +
-    'important matters when it counts.' +
-    (document ? ` The user currently has a document open titled "${document}".` : '');
+    'important matters when it counts. ' +
+    'The user may have an active document open. If so, its metadata and content ' +
+    'will be provided in their message. Base your answers on this content; when ' +
+    'the user asks to summarise, find clauses, list action items, or draft a ' +
+    'response, work directly from it and quote or cite the relevant parts. ' +
+    'If the document content is missing or unreadable, ask the user to ' +
+    'confirm details rather than guessing.';
 
-  // Give the model the actual document to work from.
+  let context = '';
+  if (document) {
+    context += `\n\n[Active Document: "${document}"]`;
+  }
   if (docText) {
-    system +=
-      '\n\nThe full text of the open document is provided below between ' +
-      '<document> tags. Base your answers on this content; when the user asks ' +
-      'to summarise, find clauses, list action items, or draft a response, ' +
-      'work directly from it and quote or cite the relevant parts. If the ' +
-      'answer is not in the document, say so.\n<document>\n' +
-      docText +
-      '\n</document>';
+    context += `\n[Document Content]\n<document>\n${docText}\n</document>`;
   } else if (document) {
-    system +=
-      " The document's text could not be read (it may be a scanned image or " +
-      'still loading), so ask the user to confirm details rather than guessing.';
+    context += `\n[The document's text could not be read (it may be a scanned image or still loading)]`;
+  }
+
+  if (context) {
+    let lastUserMsgIdx = -1;
+    for (let i = trimmed.length - 1; i >= 0; i--) {
+      if (trimmed[i].role === 'user') {
+        lastUserMsgIdx = i;
+        break;
+      }
+    }
+    if (lastUserMsgIdx !== -1) {
+      trimmed[lastUserMsgIdx].content += context;
+    }
   }
 
   try {
