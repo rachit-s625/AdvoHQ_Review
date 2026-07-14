@@ -45,6 +45,22 @@ app.post('/api/chat', chat);
 app.post('/api/send-otp', sendOtp);
 app.post('/api/verify-otp', verifyOtp);
 
+// ── ALLOWED ROUTES (for safe redirects) ──
+const ALLOWED_REDIRECTS = new Set([
+  '/',
+  '/blog',
+  '/contact',
+  '/create-account',
+  '/editor',
+  '/home',
+  '/login',
+  '/privacy',
+  '/schedule',
+  '/settings',
+  '/signup',
+  '/terms'
+]);
+
 // ── CLEAN URLS ──
 // /schedule.html → redirect to /schedule (internal links keep the .html
 // suffix; this is what actually strips it from the address bar, matching
@@ -52,14 +68,9 @@ app.post('/api/verify-otp', verifyOtp);
 app.get(/^(.+)\.html$/, (req, res, next) => {
   const clean = req.params[0] === '/index' ? '/' : req.params[0];
   const qs = req.url.slice(req.path.length);
-  const isSafeLocalPath =
-    typeof clean === 'string' &&
-    clean.startsWith('/') &&
-    !clean.startsWith('//') &&
-    !clean.includes('\\');
   const isSafeQuery = qs === '' || qs.startsWith('?');
 
-  if (isSafeLocalPath && isSafeQuery) {
+  if (ALLOWED_REDIRECTS.has(clean) && isSafeQuery) {
     res.redirect(301, clean + qs);
   } else {
     res.redirect(301, '/');
