@@ -20,8 +20,6 @@ async function advohqApiFetch(path, options = {}) {
   if (res.status === 401) {
     localStorage.removeItem('advohq_token');
     localStorage.removeItem('advohq_user');
-    localStorage.removeItem('advohq_pw');
-    sessionStorage.removeItem('advohq_pw');
     window.location.href = 'login.html';
     throw new Error('Not authenticated');
   }
@@ -43,8 +41,6 @@ async function advohqApiUpload(path, formData) {
   if (res.status === 401) {
     localStorage.removeItem('advohq_token');
     localStorage.removeItem('advohq_user');
-    localStorage.removeItem('advohq_pw');
-    sessionStorage.removeItem('advohq_pw');
     window.location.href = 'login.html';
     throw new Error('Not authenticated');
   }

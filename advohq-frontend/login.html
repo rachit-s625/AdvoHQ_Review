@@ -253,7 +253,6 @@
         email: data.user.email || '',
         password: ''
       }));
-      localStorage.setItem('advohq_pw', p);
       window.location.href = 'home.html';
     } catch (e) {
       errEl.textContent = 'Could not reach the server. Please try again.';

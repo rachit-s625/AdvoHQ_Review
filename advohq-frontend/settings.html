@@ -747,9 +747,8 @@
             <div class="row">
               <div class="row-left">
                 <div class="row-label">Password</div>
-                <div class="row-desc" id="passwordDesc" style="display:inline-flex;align-items:center;gap:8px;">
+                <div class="row-desc" id="passwordDesc">
                   <span id="pwMask">••••••••</span>
-                  <button class="pw-eye pw-eye-inline" id="pw-row-eye" type="button" onclick="toggleStoredPw()" title="Show password" aria-label="Show password"></button>
                 </div>
               </div>
               <div class="row-right">
@@ -1071,8 +1070,6 @@
           await API.deleteAccount();
           localStorage.removeItem('advohq_token');
           localStorage.removeItem('advohq_user');
-          localStorage.removeItem('advohq_pw');
-          sessionStorage.removeItem('advohq_pw');
           window.location.href = 'index.html';
         } catch (e) {
           toast('Could not delete your account. Please try again.');
@@ -1244,35 +1241,6 @@
     if (dn) dn.value = profile.displayName;
     set('usernameDesc', '@' + profile.username);
     set('emailDesc', profile.email || 'Not set');
-    renderPassword();
-  }
-
-  // The server only stores a one-way hash, so the reveal uses a device-only
-  // copy captured at login/signup (localStorage — never sent anywhere,
-  // cleared on logout or session expiry).
-  let storedPwVisible = false;
-
-  function storedPw() { return localStorage.getItem('advohq_pw') || sessionStorage.getItem('advohq_pw') || ''; }
-
-  function renderPassword() {
-    const mask = document.getElementById('pwMask');
-    const eye  = document.getElementById('pw-row-eye');
-    if (!mask || !eye) return;
-    const pw = storedPw();
-    const showing = storedPwVisible && pw;
-    mask.textContent = showing ? pw : '••••••••';
-    eye.innerHTML = showing ? PW_EYE_HIDE : PW_EYE_SHOW;
-    eye.title = showing ? 'Hide password' : 'Show password';
-    eye.setAttribute('aria-label', eye.title);
-  }
-
-  function toggleStoredPw() {
-    if (!storedPw()) {
-      toast('Available after your next login on this device.');
-      return;
-    }
-    storedPwVisible = !storedPwVisible;
-    renderPassword();
   }
 
   // ── PASSWORD FIELD EYE TOGGLE ──
@@ -1280,7 +1248,6 @@
   const PW_EYE_HIDE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 
   document.querySelectorAll('.pw-eye').forEach(btn => { btn.innerHTML = PW_EYE_SHOW; });
-  renderPassword();
 
   function togglePwVisibility(id, btn) {
     const input = document.getElementById(id);
@@ -1343,10 +1310,6 @@
       // The backend invalidates all older tokens on password change and
       // returns a fresh one — store it so this session stays signed in.
       if (authRes && authRes.token) localStorage.setItem('advohq_token', authRes.token);
-      localStorage.setItem('advohq_pw', nw);
-      sessionStorage.removeItem('advohq_pw');
-      storedPwVisible = false;
-      renderPassword();
       hidePasswordForm();
       toast('Password changed');
     } catch (e) {

@@ -983,8 +983,6 @@ function bindLogin() {
       }));
       sessionStorage.removeItem('advohq_signup_phone');
       sessionStorage.removeItem('advohq_signup_email');
-      // Device-only copy for the Settings "show password" eye (see login.html)
-      localStorage.setItem('advohq_pw', password);
       window.location.href = 'home.html';
     } catch (e) {
       errEl.textContent = 'Could not reach the server. Please try again.';
