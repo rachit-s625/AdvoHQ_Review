@@ -52,7 +52,18 @@ app.post('/api/verify-otp', verifyOtp);
 app.get(/^(.+)\.html$/, (req, res, next) => {
   const clean = req.params[0] === '/index' ? '/' : req.params[0];
   const qs = req.url.slice(req.path.length);
-  res.redirect(301, clean + qs);
+  const isSafeLocalPath =
+    typeof clean === 'string' &&
+    clean.startsWith('/') &&
+    !clean.startsWith('//') &&
+    !clean.includes('\\');
+  const isSafeQuery = qs === '' || qs.startsWith('?');
+
+  if (isSafeLocalPath && isSafeQuery) {
+    res.redirect(301, clean + qs);
+  } else {
+    res.redirect(301, '/');
+  }
 });
 
 // ── CACHE HEADERS ──
